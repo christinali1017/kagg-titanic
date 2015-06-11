@@ -26,16 +26,20 @@ test_df = pd.read_csv('./data/test.csv', header=0)
 
 test_df['Sex'] = test_df['Sex'].map( {'female': 0, 'male': 1} ).astype(int)
 
-
+# Embarked from 'C', 'Q', 'S'
+# All missing Embarked -> just make them embark from most common place
 if len(test_df.Embarked[ test_df.Embarked.isnull() ]) > 0:
     test_df.Embarked[ test_df.Embarked.isnull() ] = test_df.Embarked.dropna().mode().values
+# Again convert all Embarked strings to int
 test_df.Embarked = test_df.Embarked.map( lambda x: Ports_dict[x]).astype(int)
 
 
+# All the ages with no data -> make the median of all Ages
 median_age = test_df['Age'].dropna().median()
 if len(test_df.Age[ test_df.Age.isnull() ]) > 0:
     test_df.loc[ (test_df.Age.isnull()), 'Age'] = median_age
 
+# All the missing Fares -> assume median of their respective class
 if len(test_df.Fare[ test_df.Fare.isnull() ]) > 0:
     median_fare = np.zeros(3)
     for f in range(0,3):                                              # loop 0 to 2
@@ -49,13 +53,14 @@ test_df = test_df.drop(['Name', 'Ticket', 'Cabin', 'PassengerId'], axis=1)
 train_data = train_df.values
 test_data = test_df.values
 
-print 'Logistic......'
-log = LogisticRegression()
-log = log.fit( train_data[0::,1::], train_data[0::,0] )
-output = log.predict(test_data).astype(int)
-predictions_file = open("./result/LogisticRegression.csv", "wb")
+print 'DecisionTree......'
+tree = DecisionTreeClassifier()
+tree = tree.fit( train_data[0::,1::], train_data[0::,0] )
+output = tree.predict(test_data).astype(int)
+predictions_file = open("./result/decisiontree.csv", "wb")
 open_file_object = csv.writer(predictions_file)
 open_file_object.writerow(["PassengerId","Survived"])
 open_file_object.writerows(zip(ids, output))
 predictions_file.close()
+
 print 'Done.'

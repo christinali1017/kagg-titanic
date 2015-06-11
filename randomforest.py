@@ -38,9 +38,9 @@ if len(test_df.Age[ test_df.Age.isnull() ]) > 0:
 
 if len(test_df.Fare[ test_df.Fare.isnull() ]) > 0:
     median_fare = np.zeros(3)
-    for f in range(0,3):                                              # loop 0 to 2
+    for f in range(0,3):                                             
         median_fare[f] = test_df[ test_df.Pclass == f+1 ]['Fare'].dropna().median()
-    for f in range(0,3):                                              # loop 0 to 2
+    for f in range(0,3):                                              
         test_df.loc[ (test_df.Fare.isnull()) & (test_df.Pclass == f+1 ), 'Fare'] = median_fare[f]
 
 ids = test_df['PassengerId'].values
@@ -49,13 +49,14 @@ test_df = test_df.drop(['Name', 'Ticket', 'Cabin', 'PassengerId'], axis=1)
 train_data = train_df.values
 test_data = test_df.values
 
-print 'Logistic......'
-log = LogisticRegression()
-log = log.fit( train_data[0::,1::], train_data[0::,0] )
-output = log.predict(test_data).astype(int)
-predictions_file = open("./result/LogisticRegression.csv", "wb")
+print 'Random forest.......'
+forest = RandomForestClassifier(n_estimators=100)
+forest = forest.fit( train_data[0::,1::], train_data[0::,0] )
+output = forest.predict(test_data).astype(int)
+predictions_file = open("./result/randomforest.csv", "wb")
 open_file_object = csv.writer(predictions_file)
 open_file_object.writerow(["PassengerId","Survived"])
 open_file_object.writerows(zip(ids, output))
 predictions_file.close()
+
 print 'Done.'

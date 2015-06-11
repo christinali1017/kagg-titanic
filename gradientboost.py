@@ -5,6 +5,8 @@ import csv as csv
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.ensemble import GradientBoostingClassifier
 
 train_df = pd.read_csv('./data/train.csv', header=0)       
 train_df['Sex'] = train_df['Sex'].map( {'female': 0, 'male': 1} ).astype(int)
@@ -25,7 +27,6 @@ train_df = train_df.drop(['Name', 'Ticket', 'Cabin', 'PassengerId'], axis=1)
 test_df = pd.read_csv('./data/test.csv', header=0)      
 
 test_df['Sex'] = test_df['Sex'].map( {'female': 0, 'male': 1} ).astype(int)
-
 
 if len(test_df.Embarked[ test_df.Embarked.isnull() ]) > 0:
     test_df.Embarked[ test_df.Embarked.isnull() ] = test_df.Embarked.dropna().mode().values
@@ -49,13 +50,14 @@ test_df = test_df.drop(['Name', 'Ticket', 'Cabin', 'PassengerId'], axis=1)
 train_data = train_df.values
 test_data = test_df.values
 
-print 'Logistic......'
-log = LogisticRegression()
-log = log.fit( train_data[0::,1::], train_data[0::,0] )
-output = log.predict(test_data).astype(int)
-predictions_file = open("./result/LogisticRegression.csv", "wb")
+print 'Adaboost......'
+gradient = GradientBoostingClassifier(n_estimators=100, learning_rate=1.0, max_depth=1, random_state=0)
+gradient = gradient.fit( train_data[0::,1::], train_data[0::,0] )
+output = gradient.predict(test_data).astype(int)
+predictions_file = open("./result/GradientBoostingClassifier.csv", "wb")
 open_file_object = csv.writer(predictions_file)
 open_file_object.writerow(["PassengerId","Survived"])
 open_file_object.writerows(zip(ids, output))
 predictions_file.close()
+
 print 'Done.'
